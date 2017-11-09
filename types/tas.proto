@@ -19,42 +19,53 @@ message AdminInformation {
   
     // Last Name of the administrator associated with this service.
     string admin_last_name = 5;
-  }
+}
   
-  message Resource {
-    // Name of a meterable resource.
-    string name = 1;
+message Resource {
+  // Name of a meterable resource.
+  string name = 1;
+
+  // (Optional) purchased amount of a meterable resource.
+  double purchased_amount = 2;
+
+  // Start date of a meterable resource as a W3C string. 
+  string start_date = 3;
+
+  // (Optional) End date of a meterable resource as a W3C string. Only sent if this is a subscription.
+  string end_date = 4;
+}
+
+message ServicePropertyBean {
+
+  // Key of the property
+  string key = 1;
+
+  // Value of the property
+  string value = 2;
+}
   
-    // (Optional) purchased amount of a meterable resource.
-    double purchased_amount = 2;
+message ServiceMessage {
   
-    // Start date of a meterable resource as a W3C string. 
-    string start_date = 3;
-  
-    // (Optional) End date of a meterable resource as a W3C string. Only sent if this is a subscription.
-    string end_date = 4;
-  }
-  
-  message ServiceMessage {
-    
-      // Optional: The Id of the account if different from account name.
-      string account_id = 1;
-  
-      // (Optional) operation based on request type e.g. acquire_relocation_lock. Possible values are disable_access (disable all), enable_access, acquire_relocation_lock, relocate, release_relocation_lock
-      string operation = 2;
-  
-      // The region where the account was created.
-      string region = 3;
-  
-      // (Optional)Information on Suspend Reason. This is base-64 encoded XML.
-      string suspend_reason = 4;
-  
-      // (Optional) administration information for newly enabled accounts.
-      AdminInformation admin_information = 5;
-  
-      // List of resources (if any).
-      repeated Resource resources = 6;
-  }
+    // Optional: The Id of the account if different from account name.
+    string account_id = 1;
+
+    // (Optional) operation based on request type e.g. acquire_relocation_lock. Possible values are disable_access (disable all), enable_access, acquire_relocation_lock, relocate, release_relocation_lock
+    string operation = 2;
+
+    // The region where the account was created.
+    string region = 3;
+
+    // (Optional)Information on Suspend Reason. This is base-64 encoded XML.
+    string suspend_reason = 4;
+
+    // (Optional) administration information for newly enabled accounts.
+    AdminInformation admin_information = 5;
+
+    // List of resources (if any).
+    repeated Resource resources = 6;
+
+    repeated ServicePropertyBean property = 7;
+}
   
   message ResponseMessage {
     

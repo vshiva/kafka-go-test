@@ -44,6 +44,12 @@ func getMessage(accountName string) *types.TasProtocol {
 					EndDate:         "2197-07-16T19:20:30.45+01:00",
 				},
 			},
+			Property: []*types.ServicePropertyBean{
+				&types.ServicePropertyBean{
+					Key:   "key1",
+					Value: "value1",
+				},
+			},
 		},
 	}
 

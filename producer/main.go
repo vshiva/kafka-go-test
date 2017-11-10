@@ -3,13 +3,28 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
+	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/vshiva/kafka-go-test/types"
+	"github.com/vshiva/kafka-go-test/utils"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+var (
+	brokers     = flag.String("brokers", os.Getenv("KAFKA_PEERS"), "The Kafka brokers to connect to, as a comma separated list")
+	topic       = flag.String("topic", "CONTAINERPIPE_tas", "Kafka Topic to which the messages needs to produced")
+	accountName = flag.String("account-name", randomStr(8), "Account Name")
+	caFile      = flag.String("kafka-cafile", "", "CA File")
+	keyFile     = flag.String("kafka-keyfile", "", "Client Key File")
+	certFile    = flag.String("kafka-certfile", "", "Client Cert File")
+	verbose     = flag.Bool("verbose", false, "Turn on logging")
+	verifySsl   = flag.Bool("verify", false, "Optional verify ssl certificates chain")
+)
 
 func randomStr(n int) string {
 	b := make([]byte, n)
@@ -58,22 +73,35 @@ func getMessage(accountName string) *types.TasProtocol {
 
 func main() {
 
-	var brokers types.KafkaBrokers
-	flag.Var(&brokers, "broker", "Kafka Brokers")
-	topic := flag.String("topic", "CONTAINERPIPE_tas", "Kafka Topic to which the messages needs to produced")
-	accountName := flag.String("accountName", randomStr(6), "Kafka Topic to which the messages needs to produced")
-
 	flag.Parse()
+	if *verbose {
+		sarama.Logger = log.New(os.Stdout, "[kafka-test] ", log.LstdFlags)
+	}
+
+	if *brokers == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	brokerList := strings.Split(*brokers, ",")
+	log.Printf("Kafka brokers: %s", strings.Join(brokerList, ", "))
 
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
 	config.Producer.Return.Successes = true
 
-	// brokers := []string{"129.213.51.85:30191", "129.213.18.45:30191", "129.213.47.121:30191"}
+	tlsConfig, err := utils.NewTLSConfig(*certFile, *keyFile, *caFile, !*verifySsl)
+	if err != nil {
+		panic(err)
+	}
 
-	// brokers := []string{"kafka:9092"}
-	producer, err := sarama.NewSyncProducer(brokers, config)
+	if tlsConfig != nil {
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = tlsConfig
+	}
+
+	producer, err := sarama.NewSyncProducer(brokerList, config)
 	if err != nil {
 		// Should not reach here. Yet we are so fail.
 		panic(err)

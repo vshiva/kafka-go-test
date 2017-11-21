@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/vshiva/kafka-go-test/types"
@@ -27,9 +28,10 @@ var (
 )
 
 func randomStr(n int) string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		b[i] = letters[r.Intn(len(letters))]
 	}
 	return string(b)
 }
@@ -47,7 +49,7 @@ func getMessage(accountName string) *types.TasProtocol {
 			AdminInformation: &types.AdminInformation{
 				AdminUsername:  randomStr(6),
 				AdminPassword:  randomStr(6),
-				AdminEmail:     randomStr(6) + "." + randomStr(8) + "@" + randomStr(3),
+				AdminEmail:     randomStr(6) + "." + randomStr(8) + "@" + randomStr(6) + ".com",
 				AdminFirstName: randomStr(6),
 				AdminLastName:  randomStr(6),
 			},
